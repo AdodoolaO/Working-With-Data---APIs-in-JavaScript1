@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="chart" width="400" height="400"></canvas>
+    <script>
+      let xlabels = [];
+      let ytemps = [];
+      chartIt();
+
+      async function chartIt() {
+        await getData();
+        let ctx = document.getElementById("chart").getContext("2d");
+
+        let myChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: xlabels,
+            datasets: [
+              {
+                label:
+                  "Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies °C",
+                data: ytemps,
+                //backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+                borderColor: ["rgba(255, 99, 132, 1)"],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                ticks: {
+                  // Include a dollar sign in the ticks
+                  callback: function (value, index, ticks) {
+                    return value + "°";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      async function getData() {
+        let response = await fetch("ZonAnn.Ts+dSST.csv");
+        let data = await response.text();
+        console.log(data);
+
+        let table = data.split("\n").slice(1);
+
+        //split allows you to break up a chunk of text into arrays -->/n is a line break
+        //slice delets an element from an array. in this case this will delte the 0 element and give
+        // a copy of an array from index 1 to the end
+
+        table.forEach((row) => {
+          let columns = row.split(",");
+          console.log(columns);
+
+          let year = columns[0];
+          xlabels.push(year);
+          let temp = columns[1];
+          console.log(year, temp);
+          ytemps.push(parseFloat(temp) + 14); // is not workin gby inself because temp is a string and 14 is a number. cannto add a string and number
+        });
+
+        //for each row of the table, spliting it into columns. Add the year to element 0 and temp to element 1
+      }
+    </script>
+  </body>
+</html>
